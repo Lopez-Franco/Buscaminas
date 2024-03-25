@@ -1,0 +1,14 @@
+
+
+#tabla-minas{
+    width: 50%;
+    margin: 0 auto;
+    
+}
+#tabla-minas td{
+    border: 1px solid;
+    text-align: center;
+}
+td:hover{
+    cursor: pointer;
+}

@@ -1,14 +1,33 @@
-
-
-#tabla-minas{
-    width: 50%;
+#table-mines {
     margin: 0 auto;
-    
+    width: 50%;
+    border-collapse: collapse;
+    border: 2px solid black;
 }
-#tabla-minas td{
-    border: 1px solid;
+#table-mines td {
+    border: 1px solid black;
+    padding: 10px;
     text-align: center;
+    width: 20px;
+    height: 20px;
+    background-color:cadetblue;
 }
-td:hover{
+
+td:hover {
     cursor: pointer;
+    filter: brightness(120%);
+    filter: invert(1);
+}
+
+#table-mines td[data-hidden="true"] {
+    background-color: #999; /* Estilo de celda oculta */
+    color: transparent; /* Oculta el contenido */
+}
+
+#table-mines td[data-hidden="false"] {
+    background-color: #fff; /* Estilo de celda mostrada */
+    color: black; /* Color de texto para celda mostrada */
+}
+#table-mines td.flag {
+    background-color: red; /* Cambia el color de fondo cuando se hace clic derecho */
 }

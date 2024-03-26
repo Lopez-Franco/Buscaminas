@@ -2,11 +2,11 @@ let main = document.getElementById('main');
 let table_game = document.createElement('table');
 table_game.id = 'table-mines';
 
-let rows = 8;
-let columns = 8;
-let minas = 10;
+let rows = 9; // (9-24)
+let columns = 9; // (9-30)
+let mines = 10; // (10-668)
 let matriz = createMatriz(rows, columns);
-let position_mines = createIndexMines(minas);
+let position_mines = createIndexMines(mines);
 
 function createMatriz(rows, columns) {
     let matriz = [];
@@ -20,10 +20,10 @@ function getRandomInt(min, max) {
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1) + min);
 }
-function createIndexMines(minas) {
+function createIndexMines(mines) {
     let position_mines = [];
     let count = 0;
-    while (count != minas) {
+    while (count != mines) {
         let array = [getRandomInt(0, rows - 1), getRandomInt(0, columns - 1)];
         let found = false;
 
@@ -48,7 +48,6 @@ function proximityNumberToMines() {
     for (let i = 0; i < rows; i++) {
         for (let j = 0; j < columns; j++) {
             let proximity = 0;
-            // let cell = table_game.rows[i].cells[j];
 
             if (!haveMineInPosition(i, j)) {
                 for (let rowAdjacent = -1; rowAdjacent <= 1; rowAdjacent++) {
@@ -57,31 +56,39 @@ function proximityNumberToMines() {
                         let newCol = j + colAdjacent;
 
                         if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < columns) {
-                            // let cellAdjacent = table_game.rows[newRow].cells[newCol];
                             if (haveMineInPosition(newRow, newCol)) {
                                 proximity++;
                             }
                         }
                     }
                 }
-                // cell.textContent = proximity;
                 matriz[i][j] = proximity;
             } else {
-                matriz[i][j] = 'M'
+                matriz[i][j] = 'M';
             }
         }
     }
-    console.log(matriz);
+}
+function clickInCell(event) {
+    let cell = event.target;
+    let row = cell.parentNode.rowIndex;
+    let col = cell.cellIndex;
+    if (haveMineInPosition(row, col)) {
+        position_mines.forEach(array =>{
+            showCell(array[0],array[1])
+        })
+        alert('Game Over')
+    } else {
+        revealAdjacentCells(row, col);
+    }
 }
 
 
 
-
 matriz.forEach(arreglo => {
-    let tr = document.createElement('tr')
+    let tr = document.createElement('tr');
     arreglo.forEach(() => {
-        let td = document.createElement('td')
-        // td.dataset.hidden = "true";
+        let td = document.createElement('td');
         td.addEventListener('click', clickInCell)
         td.addEventListener('contextmenu', clickRightInCell);
         tr.appendChild(td)
@@ -89,52 +96,41 @@ matriz.forEach(arreglo => {
     table_game.appendChild(tr)
 });
 
-
-
-function assignMines() {
-    position_mines.forEach(array => {
-        table_game.rows[array[0]].cells[array[1]].innerText = 'M'
-    })
-}
-
-
-
-function clickInCell(event) {
-    let cell = event.target;
-    let row = cell.parentNode.rowIndex;
-    let col = cell.cellIndex;
-    if (haveMineInPosition(row, col)) {
-        showCell(row,col);
-        alert('Game Over');
-    } else {
-        revealAdjacentCells(row, col);
-    }
-}
-function showCell(row, col) {
-    let proximity = matriz[row][col];
-    table_game.rows[row].cells[col].textContent = proximity;
-    return proximity === 0;
-}
 function clickRightInCell(event) {
     event.preventDefault(); // Evitar que aparezca el menú contextual predeterminado
     let cell = event.target; // Obtener la celda que recibió el clic derecho
     cell.classList.toggle('flag', !cell.classList.contains('flag'));
 
 }
+
+function showCell(row, col) {
+    let value = matriz[row][col];
+    let cell = table_game.rows[row].cells[col];
+    cell.classList.add("clicked");
+    if (value !== 0) {
+        cell.textContent = value;
+        if (value === 'M') {
+            cell.textContent = ''
+            cell.classList.add("mine");
+        }
+    }
+    
+    return value;
+}
+
 function revealAdjacentCells(row, col) {
     // Comprueba si la celda está dentro del tablero
     if (row >= 0 && col >= 0 && row < rows && col < columns) {
         // Obtiene la celda del tablero de juego
         let cell = table_game.rows[row].cells[col];
-        console.log(cell.textContent);
+        
         // Comprueba si la celda ya ha sido revelada
-        if (cell.textContent !== '') {
+        if (cell.classList.contains("clicked")) {
             return;
-        }        
+        }      
         // Revela la celda
-        let proximity = matriz[row][col];
-        cell.textContent = proximity;
-        // Si la celda tiene proximidad 0, revela las celdas adyacentes
+        let proximity = showCell(row,col);
+        
         if (proximity === 0) {
             // Itera sobre las celdas adyacentes
             for (let dx = -1; dx <= 1; dx++) {
@@ -146,11 +142,6 @@ function revealAdjacentCells(row, col) {
     }
 }
 
-
-
-
-
-// assignMines()
 proximityNumberToMines()
 
 main.appendChild(table_game)

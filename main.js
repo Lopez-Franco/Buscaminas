@@ -5,8 +5,10 @@ table_game.id = 'table-mines';
 let rows = 9; // (9-24)
 let columns = 9; // (9-30)
 let mines = 10; // (10-668)
+let flags = mines;
 let matriz = createMatriz(rows, columns);
 let position_mines = createIndexMines(mines);
+let revealCell = 0;
 
 function createMatriz(rows, columns) {
     let matriz = [];
@@ -73,6 +75,7 @@ function clickInCell(event) {
     let cell = event.target;
     let row = cell.parentNode.rowIndex;
     let col = cell.cellIndex;
+    if (cell.classList.contains('flag')) return;
     if (haveMineInPosition(row, col)) {
         position_mines.forEach(array =>{
             showCell(array[0],array[1])
@@ -80,6 +83,9 @@ function clickInCell(event) {
         alert('Game Over')
     } else {
         revealAdjacentCells(row, col);
+        if (revealCell == (rows*columns - mines)) {
+            alert('Gano')
+        }
     }
 }
 
@@ -97,15 +103,24 @@ matriz.forEach(arreglo => {
 });
 
 function clickRightInCell(event) {
-    event.preventDefault(); // Evitar que aparezca el menú contextual predeterminado
-    let cell = event.target; // Obtener la celda que recibió el clic derecho
-    cell.classList.toggle('flag', !cell.classList.contains('flag'));
-
+    event.preventDefault();
+    let cell = event.target;    
+    if (!cell.classList.contains("clicked")) {
+        if (cell.classList.contains("flag")) {
+            flags++;
+            cell.classList.remove('flag');
+        } else if (flags > 0) {
+            flags--;
+            cell.classList.add("flag");
+        }
+    }  
 }
+
 
 function showCell(row, col) {
     let value = matriz[row][col];
     let cell = table_game.rows[row].cells[col];
+    if(cell.classList.contains('flag')) return;
     cell.classList.add("clicked");
     if (value !== 0) {
         cell.textContent = value;
@@ -130,7 +145,8 @@ function revealAdjacentCells(row, col) {
         }      
         // Revela la celda
         let proximity = showCell(row,col);
-        
+        revealCell++;
+
         if (proximity === 0) {
             // Itera sobre las celdas adyacentes
             for (let dx = -1; dx <= 1; dx++) {
